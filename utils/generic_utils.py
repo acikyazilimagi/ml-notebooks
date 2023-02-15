@@ -4,7 +4,7 @@ import random
 import re
 import torch as th
 
-from sklearn.metrics import f1_score
+from sklearn.metrics import classification_report, f1_score
 
 
 def set_seed_everywhere(seed):
@@ -15,13 +15,15 @@ def set_seed_everywhere(seed):
     random.seed(seed)
 
 
-def compute_f1(eval_pred, thresholds=None, metric="macro"):
+def compute_f1(eval_pred, thresholds=None):
     logits, labels = eval_pred
     probs = th.sigmoid(th.from_numpy(logits)).numpy()
     if thresholds is None:
         thresholds = select_thresholds(labels, probs)
     predictions = (probs > thresholds).astype(int)
-    return {"f1": f1_score(predictions, labels, average=metric)}
+    clf_dict = classification_report(labels, predictions, zero_division=0, output_dict=True)
+    return {"micro f1": clf_dict["micro avg"]["f1-score"],
+            "macro f1": clf_dict["macro avg"]["f1-score"]}
 
 
 def select_thresholds(eval_labels, eval_probs, search_range=(0.3, 0.7), metric="macro"):
@@ -29,7 +31,7 @@ def select_thresholds(eval_labels, eval_probs, search_range=(0.3, 0.7), metric="
     lower, upper = search_range
     assert lower > 0 and upper < 1
     best_thresholds_per_class = []
-    for i in range(len(eval_labels.shape[1])):
+    for i in range(eval_labels.shape[1]):
         candidate_thresholds = np.arange(lower, upper, .01)
         scores = []
         for threshold in candidate_thresholds:

@@ -8,7 +8,7 @@ from huggingface_hub import login
 from transformers import (AutoTokenizer, AutoModelForMaskedLM,
                           Trainer, TrainingArguments)
 
-from ..utils import preprocess_tweet
+from utils.generic_utils import preprocess_tweet
 
 
 LABEL_NAMES = [
