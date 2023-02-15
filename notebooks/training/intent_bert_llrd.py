@@ -161,11 +161,11 @@ def main():
         # Evaluate on test data
         test_preds = trainer.predict(test_ds)
         f1 = compute_f1((test_preds.predictions, test_preds.label_ids), thresholds=thresholds)
-        f1s.append(f1["f1"])
+        f1s.append(f1["macro f1"])
         report = classification_report(
             test_preds.label_ids.astype(int),
             (th.sigmoid(th.from_numpy(test_preds.predictions)).numpy() > thresholds).astype(int),
-            target_names=LABEL_IDX2NAME.keys(), digits=3)
+            target_names=LABEL_IDX2NAME.values(), digits=3)
         print(report)
 
     print("Mean F1: {:.2f}, Std F1: {:.2f}".format(np.mean(f1s) * 100, np.std(f1s) * 100))
